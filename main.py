@@ -2,7 +2,9 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime, date, timedelta
 import json, os, hashlib, re
-
+import streamlit as st
+import pandas as pd
+import db
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE CONFIG
 # ══════════════════════════════════════════════════════════════════════════════
@@ -211,8 +213,8 @@ FACULTIES = [
 # ══════════════════════════════════════════════════════════════════════════════
 # SESSION STATE INIT
 # ══════════════════════════════════════════════════════════════════════════════
-if "bookings"     not in st.session_state: st.session_state.bookings     = load_bookings()
-if "users"        not in st.session_state: st.session_state.users        = load_users()
+if "bookings"     not in st.session_state: st.session_state.bookings = db.get_all_bookings()
+if "users"        not in st.session_state: st.session_state.users = db.get_all_users()
 if "logged_in"    not in st.session_state: st.session_state.logged_in    = False
 if "current_user" not in st.session_state: st.session_state.current_user = None
 if "auth_tab"     not in st.session_state: st.session_state.auth_tab     = "login"
@@ -437,8 +439,8 @@ if page == "📅 Book a Room":
                     "slot":       selected_slot,
                     "booked_at":  datetime.now().strftime("%Y-%m-%d %H:%M"),
                 }
-                st.session_state.bookings.append(booking)
-                save_bookings(st.session_state.bookings)
+                db.add_booking(booking)
+                st.session_state.bookings = db.get_all_bookings()
                 taken_now = slot_seats_taken(selected_room, date_str, selected_slot)
                 st.success(
                     f"Booked **{selected_room}** on **{date_str}** at **{selected_slot}**!  "
@@ -529,10 +531,8 @@ elif page == "📋 My Bookings":
             with col_btn:
                 if allow_cancel:
                     if st.button("Cancel", key=f"cancel-{b['id']}"):
-                        st.session_state.bookings = [
-                            x for x in st.session_state.bookings if x["id"] != b["id"]
-                        ]
-                        save_bookings(st.session_state.bookings)
+                        db.cancel_booking(b["id"])
+                        st.session_state.bookings = db.get_all_bookings()
                         st.rerun()
 
     tab_up, tab_past = st.tabs(["Upcoming", "Past"])
