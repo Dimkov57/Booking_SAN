@@ -7,7 +7,7 @@ import json, os, hashlib, re
 # PAGE CONFIG
 # ══════════════════════════════════════════════════════════════════════════════
 st.set_page_config(
-    page_title="SAN — Room Booking",
+    page_title="UniRoom — Room Booking",
     page_icon="🏛️",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -194,8 +194,8 @@ ROOMS = {
 }
 
 TIME_SLOTS = [
-    "08:00–09:30", "09:45–11:15", "11:30–13:00",
-    "13:15–14:45", "15:00–16:30", "16:45–18:15",
+    "08:00-09:30", "09:45-11:15", "11:30-13:00",
+    "13:15-14:45", "15:00-16:30", "16:45-18:15", "18:30-20:15",
 ]
 
 TAG_COLORS = {
@@ -220,10 +220,25 @@ if "auth_tab"     not in st.session_state: st.session_state.auth_tab     = "logi
 # ══════════════════════════════════════════════════════════════════════════════
 # HELPERS
 # ══════════════════════════════════════════════════════════════════════════════
-def is_slot_taken(room, booking_date, slot):
+MAX_SEATS = 30  # maximum students per room per time slot
+
+def get_slot_bookings(room, booking_date, slot):
+    """Return all bookings for a specific room/date/slot."""
+    return [
+        b for b in st.session_state.bookings
+        if b["room"] == room and b["date"] == booking_date and b["slot"] == slot
+    ]
+
+def slot_seats_taken(room, booking_date, slot):
+    return len(get_slot_bookings(room, booking_date, slot))
+
+def is_slot_full(room, booking_date, slot):
+    return slot_seats_taken(room, booking_date, slot) >= MAX_SEATS
+
+def user_already_booked(room, booking_date, slot, student_id):
     return any(
-        b["room"] == room and b["date"] == booking_date and b["slot"] == slot
-        for b in st.session_state.bookings
+        b["student_id"] == student_id
+        for b in get_slot_bookings(room, booking_date, slot)
     )
 
 def get_room_bookings(room, booking_date):
@@ -247,7 +262,7 @@ def show_auth():
     st.markdown("""
     <div style='text-align:center; margin: 2.5rem 0 1.5rem'>
         <div style='font-family:"Playfair Display",serif; font-size:2.4rem; color:#f0ebe0; letter-spacing:-1px'>
-            🏛️ SANroom
+            🏛️ UniRoom
         </div>
         <div style='color:#6e6c78; font-size:0.92rem; margin-top:6px'>
             University Room Booking System
@@ -387,18 +402,28 @@ if page == "📅 Book a Room":
             max_value=date.today() + timedelta(days=30),
         )
         date_str    = str(selected_date)
-        avail_slots = [s for s in TIME_SLOTS if not is_slot_taken(selected_room, date_str, s)]
+        avail_slots = [s for s in TIME_SLOTS if not is_slot_full(selected_room, date_str, s)]
 
         if avail_slots:
-            selected_slot = st.selectbox("Time Slot", avail_slots)
+            selected_slot = st.selectbox(
+                "Time Slot",
+                avail_slots,
+                format_func=lambda s: (
+                    f"{s}  \u2014  {MAX_SEATS - slot_seats_taken(selected_room, date_str, s)}/{MAX_SEATS} seats free"
+                ),
+            )
         else:
-            st.error("All slots for this room are taken on the selected date.")
+            st.error("All slots for this room are fully booked on the selected date.")
             selected_slot = None
 
         st.markdown("")
         if st.button("Confirm Booking", use_container_width=True):
             if not selected_slot:
                 st.error("No available slots.")
+            elif user_already_booked(selected_room, date_str, selected_slot, u["student_id"]):
+                st.error("You already have a booking for this room, date and time slot.")
+            elif is_slot_full(selected_room, date_str, selected_slot):
+                st.error("This slot just filled up. Please choose another.")
             else:
                 booking = {
                     "id":         f"{u['student_id']}-{date_str}-{selected_slot[:5]}",
@@ -414,7 +439,11 @@ if page == "📅 Book a Room":
                 }
                 st.session_state.bookings.append(booking)
                 save_bookings(st.session_state.bookings)
-                st.success(f"Booked **{selected_room}** on **{date_str}** at **{selected_slot}**!")
+                taken_now = slot_seats_taken(selected_room, date_str, selected_slot)
+                st.success(
+                    f"Booked **{selected_room}** on **{date_str}** at **{selected_slot}**!  "
+                    f"({taken_now}/{MAX_SEATS} seats taken)"
+                )
                 st.balloons()
 
     with col_info:
@@ -433,12 +462,24 @@ if page == "📅 Book a Room":
 
         st.markdown(f"#### Availability for {date_str}")
         for slot in TIME_SLOTS:
-            taken = is_slot_taken(selected_room, date_str, slot)
-            pill  = '<span class="pill-taken">Booked</span>' if taken else '<span class="pill-free">Free</span>'
+            taken_n = slot_seats_taken(selected_room, date_str, slot)
+            full    = taken_n >= MAX_SEATS
+            if full:
+                pill = '<span class="pill-taken">Full</span>'
+            elif taken_n == 0:
+                pill = '<span class="pill-free">Free</span>'
+            else:
+                pill = f'<span class="pill-free">{MAX_SEATS - taken_n} left</span>'
+            bar_pct = int(taken_n / MAX_SEATS * 100)
+            bar_color = "#ff6b6b" if full else ("#f0a040" if taken_n > MAX_SEATS * 0.7 else "#50dca0")
             st.markdown(
-                f"<div style='display:flex;justify-content:space-between;align-items:center;"
-                f"padding:0.42rem 0;border-bottom:1px solid #1e2333'>"
-                f"<span style='font-size:0.86rem;color:#ccc'>{slot}</span>{pill}</div>",
+                f"<div style='padding:0.42rem 0;border-bottom:1px solid #1e2333'>"
+                f"<div style='display:flex;justify-content:space-between;align-items:center'>"
+                f"<span style='font-size:0.86rem;color:#ccc'>{slot}</span>{pill}</div>"
+                f"<div style='background:#1e2333;border-radius:4px;height:4px;margin-top:5px'>"
+                f"<div style='background:{bar_color};width:{bar_pct}%;height:4px;border-radius:4px'></div>"
+                f"</div><div style='font-size:0.72rem;color:#6e6c78;margin-top:3px'>{taken_n}/{MAX_SEATS} seats taken</div>"
+                f"</div>",
                 unsafe_allow_html=True,
             )
 
@@ -652,11 +693,13 @@ elif page == "🗺️ Room Overview":
                 unsafe_allow_html=True,
             )
             for slot in TIME_SLOTS:
-                taken = is_slot_taken(room_name, date_str, slot)
-                color = "#ff6b6b" if taken else "#50dca0"
-                icon  = "●" if taken else "○"
+                taken_n = slot_seats_taken(room_name, date_str, slot)
+                full    = taken_n >= MAX_SEATS
+                color   = "#ff6b6b" if full else ("#f0a040" if taken_n > 0 else "#50dca0")
+                icon    = "●" if full else ("◑" if taken_n > 0 else "○")
+                label   = f"{slot}  ({taken_n}/{MAX_SEATS})"
                 st.markdown(
-                    f"<div style='font-size:0.79rem;color:{color};line-height:1.85'>{icon} {slot}</div>",
+                    f"<div style='font-size:0.79rem;color:{color};line-height:1.85'>{icon} {label}</div>",
                     unsafe_allow_html=True,
                 )
         st.markdown("<hr>", unsafe_allow_html=True)
@@ -695,10 +738,10 @@ elif page == "ℹ️ About":
 | 1 | 08:00 – 09:30 |
 | 2 | 09:45 – 11:15 |
 | 3 | 11:30 – 13:00 |
-| 4 | 13:30 – 15:00 |
-| 5 | 15:15 – 16:45 |
-| 6 | 17:00 – 18:30 |
-| 7 | 18:45 – 20:15 |
+| 4 | 13:15 – 14:45 |
+| 5 | 15:00 – 16:30 |
+| 6 | 16:45 – 18:15 |
+| 7 | 18:30 – 20:15 |
 
 ---
     """)
