@@ -2,13 +2,6 @@
 --  BOOKING_SAN  ·  Schemat PostgreSQL
 --  W pełni odpowiada strukturze main.py (Dimkov57/Booking_SAN)
 -- ══════════════════════════════════════════════════════════════════════════════
---
---  Jak uruchomić:
---    psql -U postgres -c "CREATE DATABASE booking_san;"
---    psql -U postgres -d booking_san -f booking_san.sql
---
---  Lub w pgAdmin: otwórz plik → zaznacz wszystko → F5 (Execute)
--- ══════════════════════════════════════════════════════════════════════════════
 
 -- Rozszerzenie do UUID (używane w tabeli bookings)
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
@@ -634,4 +627,6 @@ SELECT
     COUNT(DISTINCT room_id)                           AS unikalne_sale
 FROM bookings
 WHERE student_id = 's12345';
+
+
 
