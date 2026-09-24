@@ -1,4 +1,4 @@
-UniRoom — System Rezerwacji Sal Uniwersyteckich
+🏛️ UniRoom — System Rezerwacji Sal Uniwersyteckich
 
 UniRoom to aplikacja webowa do rezerwacji sal wykładowych i innych pomieszczeń uniwersyteckich. Studenci rejestrują się, wybierają wolny termin w danej sali i potwierdzają rezerwację — bez papierologii i kolejek.
 
@@ -101,4 +101,4 @@ Rezerwować można maksymalnie 30 dni naprzód
 Rezerwację można anulować w dowolnym momencie przed rozpoczęciem terminu
 👨‍🎓 O projekcie
 
-Projekt został opracowany jako praca zaliczeniowa (projekt kursowy/laboratoryjny) w ramach przedmiotu w Społecznej Akademii Nauk (SAN)
+Projekt został opracowany jako praca zaliczeniowa (projekt kursowy/laboratoryjny) w ramach przedmiotu w Społecznej Akademii Nauk (SAN).
