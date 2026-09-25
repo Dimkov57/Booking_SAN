@@ -4,13 +4,13 @@ UniRoom to aplikacja webowa do rezerwacji sal wykładowych i innych pomieszczeń
 
 Projekt zbudowany na Python + Streamlit z bazą danych PostgreSQL.
 
-✨ Funkcjonalności
-🔐 Rejestracja i logowanie za pomocą numeru studenckiego, adresu e-mail i wydziału (hasło przechowywane jako hash SHA-256)
-📅 Rezerwacja sali — wybór pomieszczenia, daty (do 30 dni naprzód) oraz wolnego przedziału czasowego
-📋 Moje rezerwacje — przegląd nadchodzących i przeszłych rezerwacji, anulowanie, eksport do CSV
-👤 Profil użytkownika — edycja danych osobowych i zmiana hasła
-🗺️ Przegląd sal — filtrowanie po typie i pojemności, podgląd zajętości terminów w wybranym dniu
-🏢 Katalog 18 sal (aule, laboratoria, sale seminaryjne, pracownie) na 3 piętrach w dwóch budynkach (P, K)
+ Funkcjonalności
+ Rejestracja i logowanie za pomocą numeru studenckiego, adresu e-mail i wydziału (hasło przechowywane jako hash SHA-256)
+ Rezerwacja sali — wybór pomieszczenia, daty (do 30 dni naprzód) oraz wolnego przedziału czasowego
+ Moje rezerwacje — przegląd nadchodzących i przeszłych rezerwacji, anulowanie, eksport do CSV
+ Profil użytkownika — edycja danych osobowych i zmiana hasła
+ Przegląd sal — filtrowanie po typie i pojemności, podgląd zajętości terminów w wybranym dniu
+ Katalog 18 sal (aule, laboratoria, sale seminaryjne, pracownie) na 3 piętrach w dwóch budynkach (P, K)
 Przedziały czasowe
 #	Godziny
 1	08:00 – 09:30
@@ -29,7 +29,7 @@ Sterownik bazy danych	psycopg2-binary
 Przetwarzanie danych	pandas
 Konfiguracja	python-dotenv
 Konteneryzacja	Docker / Docker Compose
-📁 Struktura projektu
+ Struktura projektu
 Booking_SAN/
 ├── API/                    # Moduł API
 ├── main.py                 # Główna aplikacja Streamlit (UI, strony, logika)
@@ -40,7 +40,7 @@ Booking_SAN/
 ├── docker-compose.yml      # Orkiestracja app + PostgreSQL
 ├── requirements.txt        # Zależności Pythona
 └── .env                    # Zmienne środowiskowe (nie commituj prawdziwych wartości!)
-🚀 Uruchomienie projektu
+ Uruchomienie projektu
 Wariant 1: Docker Compose (zalecany)
 
 Najprostszy sposób — uruchomienie aplikacji razem z bazą danych za jednym razem:
@@ -65,7 +65,7 @@ Uruchom aplikację:
 bash
    streamlit run main.py
 Otwórz w przeglądarce http://localhost:8501
-⚙️ Zmienne środowiskowe (.env)
+ Zmienne środowiskowe (.env)
 
 Plik .env powinien zawierać parametry połączenia z PostgreSQL, na przykład:
 
@@ -76,9 +76,9 @@ DB_NAME=booking_san
 DB_USER=postgres
 DB_PASSWORD=your_password_here
 
-⚠️ Ważne: nie publikuj prawdziwych haseł i kluczy w repozytorium. Dodaj .env do .gitignore i unikaj zapisanych na sztywno danych dostępowych w docker-compose.yml w środowisku produkcyjnym.
+ Ważne: nie publikuj prawdziwych haseł i kluczy w repozytorium. Dodaj .env do .gitignore i unikaj zapisanych na sztywno danych dostępowych w docker-compose.yml w środowisku produkcyjnym.
 
-🗄️ Baza danych
+ Baza danych
 
 Schemat bazy danych (tabele użytkowników i rezerwacji) opisany jest w pliku Boo.sql i jest automatycznie stosowany przy pierwszym uruchomieniu kontenera db poprzez docker-entrypoint-initdb.d.
 
@@ -86,7 +86,7 @@ Główne encje:
 
 users — numer studencki, imię, nazwisko, e-mail, wydział, hash hasła, data rejestracji
 bookings — ID rezerwacji, sala, data, przedział czasowy, autor, cel/przeznaczenie, czas utworzenia
-📖 Jak korzystać
+ Jak korzystać
 Zarejestruj się, podając numer studencki, uniwersytecki adres e-mail i wydział.
 Zaloguj się na swoje konto.
 Przejdź do sekcji „Book a Room”, wybierz salę, datę i wolny termin, następnie potwierdź rezerwację.
@@ -99,6 +99,6 @@ Zasady rezerwacji:
 Czas trwania jednego terminu to 90 minut
 Rezerwować można maksymalnie 30 dni naprzód
 Rezerwację można anulować w dowolnym momencie przed rozpoczęciem terminu
-👨‍🎓 O projekcie
+ O projekcie
 
 Projekt został opracowany jako praca zaliczeniowa (projekt kursowy/laboratoryjny) w ramach przedmiotu w Społecznej Akademii Nauk (SAN).
